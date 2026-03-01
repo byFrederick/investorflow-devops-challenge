@@ -97,9 +97,9 @@ module "aks" {
   oidc_issuer_enabled = true
 
   private_cluster_enabled = local.aks_private_cluster_enabled
-  network_plugin      = "azure"
-  network_plugin_mode = "overlay"
-  load_balancer_sku   = "standard"
+  network_plugin          = "azure"
+  network_plugin_mode     = "overlay"
+  load_balancer_sku       = "standard"
 
   agents_pool_name             = local.default_node_pool_config.name
   temporary_name_for_rotation  = local.default_node_pool_config.temporary_name_for_rotation
@@ -109,7 +109,7 @@ module "aks" {
   agents_max_count             = local.default_node_pool_config.max_count
   auto_scaling_enabled         = local.default_node_pool_config.auto_scaling_enabled
   only_critical_addons_enabled = true
-  vnet_subnet = local.default_node_pool_config.vnet_subnet
+  vnet_subnet                  = local.default_node_pool_config.vnet_subnet
 
   node_pools          = local.node_pools
   web_app_routing     = local.web_app_routing
