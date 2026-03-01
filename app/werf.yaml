@@ -1,0 +1,9 @@
+project: react-app
+configVersion: 1
+build:
+  platform:
+    - linux/amd64
+---
+image: react-app
+dockerfile: Dockerfile
+context: .
