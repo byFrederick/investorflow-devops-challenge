@@ -1,0 +1,67 @@
+name: 🧪 Terraform Validations
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+    branches:
+     - main
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  terraform-validations:
+    name: Terraform Validations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: terraform
+        shell: bash -leo pipefail {0}
+    strategy:
+      matrix:
+        environment: ['dev', 'qa', 'stg', 'prd']
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout current code ref
+        uses: actions/checkout@v4
+
+      - name: Login to Azure CLI
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Configure Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.5
+          terraform_wrapper: true
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Configure tflint on runner
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.60.0
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: Init TFLint
+        run: tflint --init
+
+      - name: Run tflint command
+        run: tflint --recursive --config .tflint.hcl
+
+      - name: Terraform Validate
+        run: terraform validate
+        env:
+          TF_WORKSPACE: ${{ matrix.environment }}
+
+      - name: Run Terraform Plan
+        run: terraform plan -lock=false
+        env:
+          TF_WORKSPACE: ${{ matrix.environment }}
