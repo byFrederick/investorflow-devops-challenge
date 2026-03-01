@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ tpl $.Values.serviceName $ }}
+  labels:
+    app: {{ tpl $.Values.serviceName $ }}
+spec:
+  replicas: {{ default 1 $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ tpl $.Values.serviceName $ }}
+  template:
+    metadata:
+      annotations:
+        commit: {{ $.Values.werf.commit.hash }}
+      labels:
+        app: {{ tpl $.Values.serviceName $ }}
+    spec:
+      containers:
+        - name: {{ tpl $.Values.serviceName $ }}
+          image: {{ get $.Values.werf.image "react-app" }}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: {{ tpl $.Values.serviceName $ }}
+          livenessProbe:
+            httpGet:
+              port: {{ $.Values.port }}
+              path: /
+            initialDelaySeconds: {{ $.Values.probe.liveness.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.probe.liveness.periodSeconds }}
+            timeoutSeconds: {{ $.Values.probe.liveness.timeoutSeconds }}
+            failureThreshold: {{ $.Values.probe.liveness.failureThreshold }}
+          ports:
+            - containerPort: {{ $.Values.port }}
+          resources:
+            requests:
+              memory: {{ $.Values.resources.requests.memory }}
+              cpu: {{ $.Values.resources.requests.cpu }}
+            limits:
+              memory: {{ $.Values.resources.limits.memory }}
+              cpu: {{ $.Values.resources.limits.cpu }}

@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ tpl $.Values.serviceName $ }}
+spec:
+  ingressClassName: webapprouting.kubernetes.azure.com
+  rules:
+    - host: {{ tpl $.Values.domain $ }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ tpl $.Values.serviceName $ }}
+                port:
+                  number: {{ $.Values.port }}

@@ -1,0 +1,27 @@
+serviceName: investorflow-react-app
+
+replicaCount: 1
+port: 8080
+
+domain: "investorflow-react-app.{{ .Values.werf.env }}.byfrederick.work"
+
+service:
+  type: ClusterIP
+
+probe:
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+resources:
+  requests:
+    memory: 64Mi
+    cpu: 50m
+  limits:
+    memory: 128Mi
+    cpu: 100m
+
+environmentVariables:
+  ENV: "{{ .Values.werf.env }}"

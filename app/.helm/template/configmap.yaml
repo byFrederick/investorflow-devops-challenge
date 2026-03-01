@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ tpl $.Values.serviceName $ }}
+data:
+{{- if $.Values.environmentVariables }}
+{{- range $key, $value := $.Values.environmentVariables }}
+  {{ $key }}: {{ tpl (toString $value) $ | quote }}
+{{- end }}
+{{- else }}
+  ENV: {{ default "dev" $.Values.werf.env | quote }}
+{{- end }}
