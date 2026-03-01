@@ -41,6 +41,9 @@ locals {
     node_taints                 = []
     os_type                     = "Linux"
     temporary_name_for_rotation = "defaulttmp"
+    vnet_subnet = {
+      id = module.vnet.subnets.aks.resource_id
+    }
   }
 
   node_pools = {
@@ -56,7 +59,7 @@ locals {
   }
 
   aks_attached_acr_id_map = {
-    "${local.project_name}" = module.acr.resource_id
+    acr = module.acr.resource_id
   }
 }
 
