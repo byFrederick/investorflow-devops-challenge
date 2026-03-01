@@ -1,0 +1,75 @@
+version: '3'
+
+vars:
+  PROJECT: 'investorflow'
+  AZ_REGION: 'eastus'
+  AZ_SUBSCRIPTION_ID: '8d329d72-8494-4e54-843a-78f0e2544c3a'
+  APP: 'react-app'
+
+tasks:
+  az-login:
+    desc: Authenticate against the target subscription ID using Azure CLi
+    requires:
+      vars:
+        - AZ_SUBSCRIPTION_ID
+    cmds:
+      - az account set --subscription={{.AZ_SUBSCRIPTION_ID}}
+    status:
+      - (az account show | jq '.id') | grep -q {{.AZ_SUBSCRIPTION_ID}}
+
+  acr-login:
+    desc: Authenticate to the remote Azure ACR repository using the Azure CLI
+    requires:
+      vars:
+        - ACR_REGISTRY
+    cmds:
+      - task: az-login
+      - az acr login --name {{.ACR_REGISTRY}}
+  
+  kubeconfig:
+    desc: Configures the local kubeconfig with the Azure AKS cluster credentials
+    requires:
+      vars:
+        - RESOURCE_GROUP
+        - AKS_CLUSTER_NAME
+    cmds:
+      - az aks get-credentials
+        --resource-group {{.RESOURCE_GROUP}}
+        --name {{.AKS_CLUSTER_NAME}}
+        --overwrite-existing
+      - kubelogin convert-kubeconfig -l azurecli
+
+  werf:command-with-repo:
+    dir: app
+    requires:
+      vars: 
+        - ENVIRONMENT
+        - PROJECT
+        - COMMAND
+        - ACR_REGISTRY
+    cmds:
+      - werf {{.COMMAND}}
+        --env {{.ENVIRONMENT}}
+        --release {{.APP}}-{{.ENVIRONMENT}}
+        --repo {{.ACR_REGISTRY}}/{{.ENVIRONMENT}}/{{.APP}}
+        --values .helm/values.yaml
+        --values .helm/values/{{.ENVIRONMENT}}.yaml
+        --dev
+  
+  deploy:
+    desc: Runs the deployment workflow with 'werf converge'
+    vars:
+      ENVIRONMENT: '{{.ENVIRONMENT | default .CLI_ARGS}}'
+    cmds:
+      - task: acr-login
+        vars:
+          ACR_REGISTRY: 'acr{{.PROJECT}}{{.AZ_REGION}}{{.ENVIRONMENT}}'
+      - task: kubeconfig
+        vars:
+          RESOURCE_GROUP: 'rg-{{.PROJECT}}-{{.AZ_REGION}}-{{.ENVIRONMENT}}'
+          AKS_CLUSTER_NAME: 'aks-{{.PROJECT}}-{{.AZ_REGION}}-{{.ENVIRONMENT}}'
+      - task: werf:command-with-repo
+        vars:
+          COMMAND: 'converge'
+          ENVIRONMENT: '{{.ENVIRONMENT}}'
+          ACR_REGISTRY: 'acr{{.PROJECT}}{{.AZ_REGION}}{{.ENVIRONMENT}}.azurecr.io'

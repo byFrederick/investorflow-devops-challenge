@@ -8,7 +8,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:1.28-alpine3.23 as run
+FROM nginxinc/nginx-unprivileged:1.28-alpine3.23 AS run
 
 COPY --from=build /usr/src/app/build /usr/share/nginx/html
 
