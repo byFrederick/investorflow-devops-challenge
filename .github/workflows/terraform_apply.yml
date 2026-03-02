@@ -14,7 +14,7 @@ on:
           - prd
 
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.ref }}'
+  group: '${{ github.workflow }}-${{ inputs.environment }} @ ${{ github.ref }}'
   cancel-in-progress: false
 
 jobs:
