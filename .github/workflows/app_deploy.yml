@@ -38,7 +38,7 @@ jobs:
       - name: Setup Task
         uses: go-task/setup-task@v1
         with:
-          version: 3.46.0
+          version: 3.46.1
 
       - name: Install werf
         uses: werf/actions/install@v2
