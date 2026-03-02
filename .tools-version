@@ -4,3 +4,4 @@ terraform       1.13.5
 tflint          0.60.0
 nodejs          24.11.1
 task            3.46.0
+werf            2.51.6

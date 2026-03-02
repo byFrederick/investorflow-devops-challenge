@@ -1,10 +1,10 @@
-name: 🚀 Terraform Apply
+name: 🚀 App Deploy
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: Environment to apply
+        description: Environment to deploy
         required: true
         type: choice
         options:
@@ -18,17 +18,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  terraform-apply:
-    name: Terraform Apply (${{ inputs.environment }})
+  app-deploy:
+    name: App Deployment to ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    environment: ${{ inputs.environment }}
     defaults:
       run:
-        working-directory: terraform
         shell: bash -leo pipefail {0}
-    environment: ${{ inputs.environment }}
-    env:
-      TF_WORKSPACE: ${{ inputs.environment }}
     steps:
       - name: Checkout current code ref
         uses: actions/checkout@v4
@@ -38,14 +35,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Configure Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Setup Task
+        uses: go-task/setup-task@v1
         with:
-          terraform_version: 1.13.5
-          terraform_wrapper: true
+          version: 3.46.0
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Install werf
+        uses: werf/actions/install@v2
+        with:
+          version: v2.51.6
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false
+      - name: Install Kubelogin
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: 'v0.2.12'
+
+      - name: Deployment
+        run: task deploy
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}

@@ -38,7 +38,7 @@ module "acr" {
   source  = "Azure/avm-res-containerregistry-registry/azurerm"
   version = "~> 0.5.0"
 
-  name                = replace(module.naming.container_registry.name, "-", "")
+  name                = module.naming.container_registry.name
   location            = var.azure_location
   resource_group_name = azurerm_resource_group.main.name
 

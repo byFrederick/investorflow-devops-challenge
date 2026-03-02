@@ -27,7 +27,6 @@ locals {
 # AKS
 locals {
   kubernetes_version = "1.34"
-
   aks_automatic_channel_upgrade = "patch"
   aks_private_cluster_enabled   = false
 
