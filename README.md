@@ -11,7 +11,7 @@ Azure platform provisioning and Kubernetes delivery implemented with Terraform, 
 - [Promotion Flow](#promotion-flow)
 - [Identity and Permissions](#identity-and-permissions)
 - [Local Execution Parity](#local-execution-parity)
-- [Documentation Provenance](#documentation-provenance)
+- [Important Note](#important-note)
 
 ## Architecture Summary
 - Cloud: Azure, single codebase deployed to `dev`, `qa`, `stg`, `prd`.
@@ -120,5 +120,5 @@ TF_WORKSPACE=dev terraform plan -lock=false
 ENVIRONMENT=dev task deploy
 ```
 
-## Documentation Provenance
-This README was generated with help from an AI assistant and reviewed against the repository configuration.
+## Important Note
+This README was generated with help from an AI assistant, I also used AI for assistance while I was working on this challenge.
